@@ -21,9 +21,10 @@ module Rack
 
     alias :to_path :path
 
-    def initialize(root, cache_control = nil)
+    def initialize(root, cache_control = nil, default_mime = 'text/plain')
       @root = root
       @cache_control = cache_control
+      @default_mime = default_mime
     end
 
     def call(env)
@@ -70,15 +71,13 @@ module Rack
     def serving(env)
       last_modified = F.mtime(@path).httpdate
       return [304, {}, []] if env['HTTP_IF_MODIFIED_SINCE'] == last_modified
-      response = [
-        200,
-        {
-          "Last-Modified"  => last_modified,
-          "Content-Type"   => Mime.mime_type(F.extname(@path), 'text/plain')
-        },
-        env["REQUEST_METHOD"] == "HEAD" ? [] : self
-      ]
-      response[1].merge! 'Cache-Control' => @cache_control if @cache_control
+      
+      headers = { "Last-Modified" => last_modified }
+      mime = Mime.mime_type(F.extname(@path), @default_mime)
+      headers["Content-Type"] = mime if mime
+      headers['Cache-Control'] = @cache_control if @cache_control
+
+      response = [ 200, headers, env["REQUEST_METHOD"] == "HEAD" ? [] : self ]
 
       # NOTE:
       #   We check via File::size? whether this file provides size info
