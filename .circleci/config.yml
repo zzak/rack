@@ -18,7 +18,7 @@ jobs:
         # https://github.com/circleci/circleci-images/pull/132
         command: sudo /bin/sh
       - image: memcached:1.4
-    steps:
+    steps: &default-steps
       - checkout
       - run: sudo apt-get install lighttpd libfcgi-dev libmemcached-dev
 
@@ -45,24 +45,7 @@ jobs:
         # https://github.com/circleci/circleci-images/pull/132
         command: sudo /bin/sh
       - image: memcached:1.4
-    steps:
-      - checkout
-      - run: sudo apt-get install lighttpd libfcgi-dev libmemcached-dev
-
-      # Restore bundle cache
-      - type: cache-restore
-        key: rack-{{ checksum "rack.gemspec" }}
-
-      # Bundle install dependencies
-      - run: bundle install --path vendor/bundle
-
-      # Store bundle cache
-      - type: cache-save
-        key: rack-{{ checksum "rack.gemspec" }}
-        paths:
-          - vendor/bundle
-
-      - run: bundle exec rake ci
+    steps: *default-steps
 
   test-ruby-2.4:
     docker:
@@ -72,24 +55,7 @@ jobs:
         # https://github.com/circleci/circleci-images/pull/132
         command: sudo /bin/sh
       - image: memcached:1.4
-    steps:
-      - checkout
-      - run: sudo apt-get install lighttpd libfcgi-dev libmemcached-dev
-
-      # Restore bundle cache
-      - type: cache-restore
-        key: rack-{{ checksum "rack.gemspec" }}
-
-      # Bundle install dependencies
-      - run: bundle install --path vendor/bundle
-
-      # Store bundle cache
-      - type: cache-save
-        key: rack-{{ checksum "rack.gemspec" }}
-        paths:
-          - vendor/bundle
-
-      - run: bundle exec rake ci
+    steps: *default-steps
 
   test-ruby-2.5:
     docker:
@@ -99,21 +65,4 @@ jobs:
         # https://github.com/circleci/circleci-images/pull/132
         command: sudo /bin/sh
       - image: memcached:1.4
-    steps:
-      - checkout
-      - run: sudo apt-get install lighttpd libfcgi-dev libmemcached-dev
-
-      # Restore bundle cache
-      - type: cache-restore
-        key: rack-{{ checksum "rack.gemspec" }}
-
-      # Bundle install dependencies
-      - run: bundle install --path vendor/bundle
-
-      # Store bundle cache
-      - type: cache-save
-        key: rack-{{ checksum "rack.gemspec" }}
-        paths:
-          - vendor/bundle
-
-      - run: bundle exec rake ci
+    steps: *default-steps
